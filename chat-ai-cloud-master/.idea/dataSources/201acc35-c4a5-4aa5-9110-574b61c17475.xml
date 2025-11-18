@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataSource name="@localhost">
+  <database-model serializer="dbm" dbms="REDIS" family-id="REDIS" format-version="4.53">
+    <root id="1">
+      <ServerVersion>5.0.14.1</ServerVersion>
+    </root>
+    <schema id="2" parent="1" name="0">
+      <Current>1</Current>
+    </schema>
+    <schema id="3" parent="1" name="1"/>
+    <schema id="4" parent="1" name="2"/>
+    <schema id="5" parent="1" name="3"/>
+    <schema id="6" parent="1" name="4"/>
+    <schema id="7" parent="1" name="5"/>
+    <schema id="8" parent="1" name="6"/>
+    <schema id="9" parent="1" name="7"/>
+    <schema id="10" parent="1" name="8"/>
+    <schema id="11" parent="1" name="9"/>
+    <schema id="12" parent="1" name="10"/>
+    <schema id="13" parent="1" name="11"/>
+    <schema id="14" parent="1" name="12"/>
+    <schema id="15" parent="1" name="13"/>
+    <schema id="16" parent="1" name="14"/>
+    <schema id="17" parent="1" name="15"/>
+    <collection id="18" parent="2" name="38"/>
+    <collection id="19" parent="2" name="9fefa5265f764c48b7a342d5046cd35b"/>
+    <collection id="20" parent="2" name="bilibili_uploader_101"/>
+    <collection id="21" parent="2" name="english_101"/>
+    <collection id="22" parent="2" name="female_physiology_101"/>
+    <collection id="23" parent="2" name="spring_cloud_101"/>
+    <collection id="24" parent="2" name="task:4e97b10d-0897-4e98-a16e-5873b90e639e"/>
+    <collection id="25" parent="2" name="task:a4697663-5518-4dc4-8c51-775cdc548f2d"/>
+    <collection id="26" parent="2" name="task:b8001392-8e8d-4c17-87bd-09b0448c00ca"/>
+    <collection id="27" parent="2" name="task:ba06e583-9067-4575-9d86-94ecc82d67e0"/>
+    <collection id="28" parent="2" name="task:ecabc66b-93e5-4b7e-8561-59907e1eee73"/>
+    <collection id="29" parent="2" name="task:fd2d5ae8-b995-4df2-886b-a5747771eb40"/>
+    <collection id="30" parent="4" name="admin"/>
+    <collection id="31" parent="4" name="login_tokens:5b8a964e-5275-4964-a559-721cea06a46a"/>
+    <collection id="32" parent="4" name="sys_config:sys.account.captchaEnabled"/>
+    <collection id="33" parent="4" name="sys_config:sys.account.registerUser"/>
+    <collection id="34" parent="4" name="sys_config:sys.index.sideTheme"/>
+    <collection id="35" parent="4" name="sys_config:sys.index.skinName"/>
+    <collection id="36" parent="4" name="sys_config:sys.login.blackIPList"/>
+    <collection id="37" parent="4" name="sys_config:sys.user.initPassword"/>
+    <collection id="38" parent="4" name="sys_dict:sys_common_status"/>
+    <collection id="39" parent="4" name="sys_dict:sys_industry"/>
+    <collection id="40" parent="4" name="sys_dict:sys_job_group"/>
+    <collection id="41" parent="4" name="sys_dict:sys_job_status"/>
+    <collection id="42" parent="4" name="sys_dict:sys_normal_disable"/>
+    <collection id="43" parent="4" name="sys_dict:sys_notice_status"/>
+    <collection id="44" parent="4" name="sys_dict:sys_notice_type"/>
+    <collection id="45" parent="4" name="sys_dict:sys_oper_type"/>
+    <collection id="46" parent="4" name="sys_dict:sys_point_rule"/>
+    <collection id="47" parent="4" name="sys_dict:sys_show_hide"/>
+    <collection id="48" parent="4" name="sys_dict:sys_user_sex"/>
+    <collection id="49" parent="4" name="sys_dict:sys_user_tag"/>
+    <collection id="50" parent="4" name="sys_dict:sys_yes_no"/>
+  </database-model>
+</dataSource>

@@ -1,0 +1,40 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: quiz-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 1.15.105.45:8848
+        username: nacos
+        password: 123456
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]': # 匹配所有路径
+            allowed-origins: # 允许的前端域名（生产环境务必指定具体域名，而非*）
+              - "https://front.example.com"
+              - "http://localhost:5173"  # 开发环境
+            allowed-methods: # 允许的请求方法
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers: "*"  # 允许的请求头
+            allow-credentials: true  # 允许携带Cookie
+            max-age: 3600  # 预检请求缓存时间（减少OPTIONS请求次数）
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: quiz-user-route
+          uri: http://localhost:8082
+          predicates:
+            - Path=/user/**
+        - id: quiz-question-route
+          uri: http://localhost:8083
+          predicates:
+            - Path=/question/**
