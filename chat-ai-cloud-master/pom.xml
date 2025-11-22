@@ -17,11 +17,12 @@
         <module>chat-question</module>
         <module>chat-practice</module>
         <module>chat-community</module>
+        <module>chat-room</module>
     </modules>
 
     <!-- 统一依赖版本管理 -->
     <properties>
-        <java.version>21</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>

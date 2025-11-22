@@ -12,6 +12,7 @@
         <module name="chat-common" />
         <module name="chat-practice" />
         <module name="chat-gateway" />
+        <module name="chat-room" />
       </profile>
       <profile name="Annotation profile for chat-ai" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
