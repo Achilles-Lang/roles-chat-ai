@@ -76,31 +76,50 @@ public class ChatRoomServiceImpl implements ChatRoomService {
      * 专门用来召唤 AI 的异步方法
      */
     private void triggerAIReply(Long roomId, String userContent) {
-        // 1. 查出这个房间里住了哪些 AI
         List<RoomAiPersona> bots = aiPersonaMapper.selectList(
                 new LambdaQueryWrapper<RoomAiPersona>().eq(RoomAiPersona::getRoomId, roomId)
         );
 
         if (bots.isEmpty()) {
-            System.out.println("当前房间没有 AI 入驻。");
-            return; // 如果没配置AI，就不回话
+            return;
+        }
+        List<ChatMessage> historyList = chatMessageMapper.selectList(
+                new LambdaQueryWrapper<ChatMessage>()
+                        .eq(ChatMessage::getRoomId, roomId)
+                        .orderByDesc(ChatMessage::getCreateTime) // 倒序查，取最新的
+                        .last("LIMIT 10")
+        );
+
+        // 拼接历史记录字符串
+        // 格式类似于：
+        // User1: 大家好
+        StringBuilder historyBuilder = new StringBuilder();
+        for (int i = historyList.size() - 1; i >= 0; i--) {
+            ChatMessage msg = historyList.get(i);
+            historyBuilder.append(msg.getSenderName()).append(": ").append(msg.getContent()).append("\n");
         }
 
-        // 2. 让所有 AI 开始干活（这里演示“全部回复”，实际可以做随机回复）
+        String finalHistory = "【这是群聊的历史记录】：\n" + historyBuilder.toString() +
+                "\n【用户的最新发言】：\n" + userContent +
+                "\n【请你根据历史记录接话】";
+
         for (RoomAiPersona bot : bots) {
             CompletableFuture.runAsync(() -> {
+                // 防刷屏
                 try {
-                    // 为了让聊天看起来自然，每个 AI 随机延迟 1-3 秒
+                    if (Math.random()>0.6){
+                        return;
+                    }
+                    // 随机延迟
                     Thread.sleep((long) (Math.random() * 3000) + 1000);
 
-                    // 调用 AI，传入特定的人设
-                    String reply = aiClient.chatWithPersona(bot.getSystemPrompt(), userContent);
+                    String reply = aiClient.chatWithPersona(bot.getSystemPrompt(), finalHistory);
 
                     // 保存消息
                     ChatMessage aiMsg = new ChatMessage();
                     aiMsg.setRoomId(roomId);
-                    aiMsg.setSenderId(0L); // 还是 0，代表系统
-                    aiMsg.setSenderName(bot.getAiName()); // **关键：用具体角色的名字**
+                    aiMsg.setSenderId(0L);
+                    aiMsg.setSenderName(bot.getAiName());
                     aiMsg.setContent(reply);
                     aiMsg.setType("AI");
                     aiMsg.setCreateTime(LocalDateTime.now());
