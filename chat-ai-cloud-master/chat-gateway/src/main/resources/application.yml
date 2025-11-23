@@ -30,11 +30,11 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
-        - id: quiz-user-route
+        - id: chat-user-route
           uri: http://localhost:8082
           predicates:
             - Path=/user/**
-        - id: quiz-question-route
+        - id: chat-service-route
           uri: http://localhost:8083
           predicates:
             - Path=/question/**

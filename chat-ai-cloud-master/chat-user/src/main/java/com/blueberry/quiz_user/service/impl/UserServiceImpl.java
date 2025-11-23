@@ -28,11 +28,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserTO> implements 
 
     @Override
     public long login(UserDTO userDTO) {
-        var user = lambdaQuery().eq(UserTO::getUsername, userDTO.getUsername()).list().getFirst();
+        // 修改点：使用 .one() 代替 list().getFirst()
+        // .one() 会直接去数据库查一条记录，如果没有就是 null，写法更标准兼容性更好
+        UserTO user = lambdaQuery().eq(UserTO::getUsername, userDTO.getUsername()).one();
+
         if (user == null) {
             throw new UserException("用户不存在");
         }
+
         var rawPassword = userDTO.getPassword();
+        // 对比密码（注意：这里 user.getPassword() 现在能用了，因为第一步修好了）
         if (!SecureUtil.md5(rawPassword).equals(user.getPassword())) {
             throw new UserException("密码不正确");
         }
@@ -42,6 +47,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserTO> implements 
     @Override
     public UserVO getUser(long userId) {
         var userTO = lambdaQuery().eq(UserTO::getId, userId).one();
+        if (userTO == null) {
+            return null;
+        }
         var userVO = new UserVO();
         userVO.setAvatar(userTO.getAvatar());
         userVO.setNickname(userTO.getNickname());

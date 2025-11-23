@@ -14,10 +14,7 @@
         <module>chat-common</module>
         <module>chat-user</module>
         <module>chat-gateway</module>
-        <module>chat-question</module>
-        <module>chat-practice</module>
-        <module>chat-community</module>
-        <module>chat-room</module>
+        <module>chat-service</module>
     </modules>
 
     <!-- 统一依赖版本管理 -->
@@ -27,6 +24,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <spring-boot.version>3.2.0</spring-boot.version>
+        <spring-cloud.version>2023.0.0</spring-cloud.version>
         <spring-cloud-alibaba.version>2023.0.0.0-RC1</spring-cloud-alibaba.version>
         <dubbo.version>3.3.0</dubbo.version>
         <dubbo-spring-boot.version>3.3.0</dubbo-spring-boot.version>
@@ -39,6 +37,13 @@
     </properties>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- Spring Boot 父依赖 -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
