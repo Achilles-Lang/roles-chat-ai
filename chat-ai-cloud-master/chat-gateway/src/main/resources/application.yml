@@ -37,4 +37,4 @@ spring:
         - id: chat-service-route
           uri: http://localhost:8083
           predicates:
-            - Path=/question/**
+            - Path=/room/**
