@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blueberry.quiz_question.ai.ChatAIClient;
 import com.blueberry.quiz_question.entity.ChatMessage;
 import com.blueberry.quiz_question.entity.ChatRoom;
+import com.blueberry.quiz_question.entity.RoomAiPersona;
 import com.blueberry.quiz_question.mapper.ChatMessageMapper;
 import com.blueberry.quiz_question.mapper.ChatRoomMapper;
+import com.blueberry.quiz_question.mapper.RoomAiPersonaMapper;
 import com.blueberry.quiz_question.service.api.ChatRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +26,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private ChatMessageMapper chatMessageMapper;
 
     @Autowired
-    private ChatAIClient aiClient; // 注入 AI 客户端
+    private ChatAIClient aiClient;
+
+    @Autowired
+    private RoomAiPersonaMapper aiPersonaMapper;
 
     @Override
     public ChatRoom createRoom(String name, Long creatorId) {
@@ -71,39 +76,43 @@ public class ChatRoomServiceImpl implements ChatRoomService {
      * 专门用来召唤 AI 的异步方法
      */
     private void triggerAIReply(Long roomId, String userContent) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                System.out.println("AI 线程开始运行...");
+        // 1. 查出这个房间里住了哪些 AI
+        List<RoomAiPersona> bots = aiPersonaMapper.selectList(
+                new LambdaQueryWrapper<RoomAiPersona>().eq(RoomAiPersona::getRoomId, roomId)
+        );
 
-                // 调用 AI 获取回复
-                String aiResponse = aiClient.chat(userContent);
+        if (bots.isEmpty()) {
+            System.out.println("当前房间没有 AI 入驻。");
+            return; // 如果没配置AI，就不回话
+        }
 
-                // 打印 AI 的原始回复
-                System.out.println("AI 原始回复: " + aiResponse);
+        // 2. 让所有 AI 开始干活（这里演示“全部回复”，实际可以做随机回复）
+        for (RoomAiPersona bot : bots) {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    // 为了让聊天看起来自然，每个 AI 随机延迟 1-3 秒
+                    Thread.sleep((long) (Math.random() * 3000) + 1000);
 
-                if (aiResponse == null || aiResponse.isEmpty()) {
-                    System.out.println("AI 回复为空，不保存！");
-                    return;
+                    // 调用 AI，传入特定的人设
+                    String reply = aiClient.chatWithPersona(bot.getSystemPrompt(), userContent);
+
+                    // 保存消息
+                    ChatMessage aiMsg = new ChatMessage();
+                    aiMsg.setRoomId(roomId);
+                    aiMsg.setSenderId(0L); // 还是 0，代表系统
+                    aiMsg.setSenderName(bot.getAiName()); // **关键：用具体角色的名字**
+                    aiMsg.setContent(reply);
+                    aiMsg.setType("AI");
+                    aiMsg.setCreateTime(LocalDateTime.now());
+
+                    chatMessageMapper.insert(aiMsg);
+                    System.out.println(bot.getAiName() + " 已回复");
+
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-                // 把 AI 的回复存进数据库
-                ChatMessage aiMsg = new ChatMessage();
-                aiMsg.setRoomId(roomId);
-                aiMsg.setSenderId(0L); // 0 代表系统/AI
-                aiMsg.setSenderName("AI助手"); // 名字叫 AI助手
-                aiMsg.setContent(aiResponse);
-                aiMsg.setType("AI");
-                aiMsg.setCreateTime(LocalDateTime.now());
-
-                chatMessageMapper.insert(aiMsg);
-
-                System.out.println("AI 回复已成功存入数据库！");
-
-            } catch (Exception e) {
-                System.err.println("AI 线程发生异常！！");
-                e.printStackTrace();
-            }
-        });
+            });
+        }
     }
 
     @Override

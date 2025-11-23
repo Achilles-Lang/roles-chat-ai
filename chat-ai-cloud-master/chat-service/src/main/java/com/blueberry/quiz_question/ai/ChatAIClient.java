@@ -58,4 +58,17 @@ public class ChatAIClient {
                 question.getRightAnswer();
         return chatClient.prompt().system(context).user(chatRequest.getUserQuestion()).stream().chatResponse();
     }
+
+    public String chatWithPersona(String systemPrompt, String userMessage) {
+        try {
+            return chatClient.prompt()
+                    .system(systemPrompt)
+                    .user(userMessage)
+                    .call()
+                    .content();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "(AI掉线了)";
+        }
+    }
 }
