@@ -1,74 +1,68 @@
 package com.blueberry.quiz_question.ai;
 
+import com.alibaba.cloud.ai.dashscope.api.DashScopeApi;
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.blueberry.model.quetion.QuestionDTO;
 import com.blueberry.quiz_question.model.ChatRequest;
+import opennlp.tools.util.StringUtil;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 
 @Component
 public class ChatAIClient {
-    private static final String SYSTEM_PROMPT = "你是一个热情、幽默的群聊助手。你的任务是活跃气氛，" +
-            "回答用户的问题，或者对用户的发言进行有趣的接话。" +
-            "回复尽量简短（50字以内），不要长篇大论。";
+    // 默认模型
+    private final ChatClient defaultChatClient;
+    // 默认模型API KEY
+    @Value("${spring.ai.dashscope.api-key")
+    private String defaultApiKey;
 
-    private final ChatClient chatClient;
-
-    public ChatAIClient(ChatModel model) {
-        ChatMemory chatMemory = new InMemoryChatMemory();
-        chatClient = ChatClient.builder(model)
-                .defaultSystem(SYSTEM_PROMPT)
-                .defaultAdvisors(
-                        new MessageChatMemoryAdvisor(chatMemory)
-                )
-                .build();
+    public ChatAIClient(ChatModel model){
+        this.defaultChatClient = ChatClient.builder(model).build();
     }
 
-    public String chat(String uerMessage){
+    public String chatDynamic(String apiKey,String modelName,String systemPrompt,String userMessage){
         try {
-            return chatClient.prompt()
-                    .user(uerMessage)
-                    .call()
-                    .content();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "我无法回答你的问题";
-        }
-
-    }
-    /**
-     * 返回流式传输的问答方法
-     * @param chatRequest 请求
-     * @return 流式回答
-     */
-    public Flux<ChatResponse> StreamChat(ChatRequest chatRequest) {
-        QuestionDTO question = chatRequest.getQuestion();
-        var context = "在这轮对话中，你只能回答与该问题相关的问题，而不能回答其他问题" +
-                System.lineSeparator() + "该问题的题目为:" +
-                question.getTitle() +
-                "答案为:" +
-                question.getAnswers().toString() +
-                System.lineSeparator() +
-                "正确答案为:" +
-                question.getRightAnswer();
-        return chatClient.prompt().system(context).user(chatRequest.getUserQuestion()).stream().chatResponse();
-    }
-
-    public String chatWithPersona(String systemPrompt, String userMessage) {
-        try {
-            return chatClient.prompt()
+            ChatClient clientToUse;
+            // 如果用户自带了key，则使用专属的AI连接器
+            if(StringUtils.hasText(apiKey)){
+                System.out.println("使用用户自定义 Key 调用："+modelName);
+                // 用户的api
+                DashScopeApi api = new DashScopeApi(apiKey);
+                // 创建模型并指定名字
+                DashScopeChatModel customModel = new DashScopeChatModel( api,
+                        DashScopeChatOptions.builder()
+                                .withModel(StringUtils.hasText(modelName)? modelName : "qwen-plus")
+                                .build());
+                clientToUse = ChatClient.builder(customModel).build();
+            } else {
+                // 如果没带 key，则使用默认的
+                clientToUse = defaultChatClient;
+            }
+            // 发起请求
+            return clientToUse.prompt()
                     .system(systemPrompt)
                     .user(userMessage)
                     .call()
                     .content();
-        } catch (Exception e) {
+        } catch (Exception e){
             e.printStackTrace();
-            return "(AI掉线了)";
+            return "(AI连接失败："+e.getMessage()+")";
         }
+    }
+
+    public String chat(String userMessage){
+         return chatDynamic(null,null,"你是一个助手",userMessage);
+    }
+    public String chatWithPersona(String systemPrompt,String userMessage){
+        return chatDynamic(null,null,systemPrompt,userMessage);
     }
 }

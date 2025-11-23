@@ -14,6 +14,10 @@ public class RoomAiPersona {
     private String aiName;
     private String aiAvatar;
     private String systemPrompt;
+    // 自定义 Key
+    private String apiKey;
+    // 自定义模型
+    private String modelName;
 
     public Long getId() {
         return id;
@@ -53,5 +57,21 @@ public class RoomAiPersona {
 
     public void setSystemPrompt(String systemPrompt) {
         this.systemPrompt = systemPrompt;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public String getModelName() {
+        return modelName;
+    }
+
+    public void setModelName(String modelName) {
+        this.modelName = modelName;
     }
 }

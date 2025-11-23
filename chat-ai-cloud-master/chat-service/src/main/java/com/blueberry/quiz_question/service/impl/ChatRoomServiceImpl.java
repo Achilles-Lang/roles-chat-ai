@@ -113,7 +113,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                     // 随机延迟
                     Thread.sleep((long) (Math.random() * 3000) + 1000);
 
-                    String reply = aiClient.chatWithPersona(bot.getSystemPrompt(), finalHistory);
+                    String reply = aiClient.chatDynamic(
+                            bot.getApiKey(),
+                            bot.getModelName(),
+                            bot.getSystemPrompt(),
+                            finalHistory
+                    );
 
                     // 保存消息
                     ChatMessage aiMsg = new ChatMessage();
@@ -143,4 +148,20 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                         .last("LIMIT 50")
         );
     }
+
+    @Override
+    public void addAiToRoom(Long roomId, String aiName, String prompt, String apiKey, String modelName) {
+        RoomAiPersona persona = new RoomAiPersona();
+        persona.setRoomId(roomId);
+        persona.setAiName(aiName);
+        persona.setSystemPrompt(prompt);
+
+        // 新增的两个字段
+        persona.setApiKey(apiKey);
+        persona.setModelName(modelName);
+
+        persona.setAiAvatar("");
+        aiPersonaMapper.insert(persona);
+    }
+
 }

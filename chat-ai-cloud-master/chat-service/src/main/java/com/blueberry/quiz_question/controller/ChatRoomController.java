@@ -3,6 +3,7 @@ package com.blueberry.quiz_question.controller;
 import com.blueberry.model.common.Result;
 import com.blueberry.quiz_question.entity.ChatMessage;
 import com.blueberry.quiz_question.entity.ChatRoom;
+import com.blueberry.quiz_question.entity.RoomAiPersona;
 import com.blueberry.quiz_question.service.api.ChatRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -59,5 +60,17 @@ public class ChatRoomController {
     @GetMapping("/messages")
     public Result<List<ChatMessage>> getHistoryMessages(@RequestParam("roomId") Long roomId) {
         return Result.success(chatRoomService.getHistoryMessages(roomId));
+    }
+
+    @PostMapping("/addAi")
+    public Result<Void> addAiToRoom(@RequestBody RoomAiPersona aiPersona) {
+        chatRoomService.addAiToRoom(
+                aiPersona.getRoomId(),
+                aiPersona.getAiName(),
+                aiPersona.getSystemPrompt(),
+                aiPersona.getApiKey(),    // 传这俩新参数
+                aiPersona.getModelName()
+        );
+        return Result.success();
     }
 }

@@ -16,4 +16,6 @@ public interface ChatRoomService {
 
     // 获取某个房间的历史消息
     List<ChatMessage> getHistoryMessages(Long roomId);
+
+    void addAiToRoom(Long roomId, String aiName,String prompt,String apiKey,String modelName);
 }
