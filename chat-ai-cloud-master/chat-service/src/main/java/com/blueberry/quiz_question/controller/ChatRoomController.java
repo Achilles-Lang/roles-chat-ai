@@ -48,7 +48,8 @@ public class ChatRoomController {
                 message.getRoomId(),
                 message.getSenderId(),
                 message.getSenderName(),
-                message.getContent()
+                message.getContent(),
+                message.getType()
         );
         return Result.success();
     }

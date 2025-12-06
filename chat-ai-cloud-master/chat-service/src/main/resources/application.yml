@@ -35,6 +35,8 @@ spring:
       timeout: 20000ms
 server:
   port: 8083
+  tomcat:
+    max-http-form-post-size: 16MB
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.blueberry.quiz_question.entity

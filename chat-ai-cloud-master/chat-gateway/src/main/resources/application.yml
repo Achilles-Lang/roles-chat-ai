@@ -38,3 +38,5 @@ spring:
           uri: http://localhost:8083
           predicates:
             - Path=/room/**
+  codec:
+    max-in-memory-size: 16MB

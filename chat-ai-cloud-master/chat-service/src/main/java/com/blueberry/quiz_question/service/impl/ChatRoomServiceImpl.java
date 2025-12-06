@@ -54,26 +54,23 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public void sendMessage(Long roomId, Long senderId, String senderName, String content) {
-        // 1. 打印日志：确认收到了消息
-        System.out.println("收到消息 -> 房间: " + roomId + ", 发送者: " + senderName + ", 内容: " + content);
+    public void sendMessage(Long roomId, Long senderId, String senderName, String content,String type) {
+        System.out.println("收到消息 -> 类型: " + type + ", 内容长度: " + (content != null ? content.length() : 0));
 
-        // 2. 先保存用户发的消息
+        // 先保存用户发的消息
         ChatMessage userMsg = new ChatMessage();
         userMsg.setRoomId(roomId);
         userMsg.setSenderId(senderId);
         userMsg.setSenderName(senderName);
         userMsg.setContent(content);
-        userMsg.setType("TEXT");
+        userMsg.setType(type != null ? type : "TEXT");
+
         userMsg.setCreateTime(LocalDateTime.now());
         chatMessageMapper.insert(userMsg);
 
-        // 3. 异步触发 AI 回复 (防止自己触发自己)
-        if (!"AI助手".equals(senderName)) {
+        if("TEXT".equals(userMsg.getType()) && !"AI助手".equals(senderName)){
             System.out.println("正在准备召唤 AI...");
             triggerAIReply(roomId, content);
-        } else {
-            System.out.println("这是 AI 自己发的消息，不触发回复。");
         }
     }
 

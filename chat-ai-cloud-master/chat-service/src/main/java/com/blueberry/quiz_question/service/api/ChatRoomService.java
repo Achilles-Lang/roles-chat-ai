@@ -14,7 +14,7 @@ public interface ChatRoomService {
     List<ChatRoom> getRoomList();
 
     // 发送一条消息
-    void sendMessage(Long roomId, Long senderId, String senderName, String content);
+    void sendMessage(Long roomId, Long senderId, String senderName, String content,String type);
 
     // 获取某个房间的历史消息
     List<ChatMessage> getHistoryMessages(Long roomId);
