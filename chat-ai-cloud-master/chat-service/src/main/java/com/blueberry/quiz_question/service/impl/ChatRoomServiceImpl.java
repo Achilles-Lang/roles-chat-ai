@@ -11,6 +11,7 @@ import com.blueberry.quiz_question.mapper.RoomAiPersonaMapper;
 import com.blueberry.quiz_question.service.api.ChatRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.View;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +31,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Autowired
     private RoomAiPersonaMapper aiPersonaMapper;
+    @Autowired
+    private View error;
 
     @Override
     public ChatRoom createRoom(String name, Long creatorId) {
@@ -86,7 +89,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         if (bots.isEmpty()) {
             System.out.println("房间 " + roomId + " 没有 AI，停止召唤。");
-
             return;
         }
         List<ChatMessage> historyList = chatMessageMapper.selectList(
@@ -96,9 +98,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                         .last("LIMIT 10")
         );
 
-        // 拼接历史记录字符串
-        // 格式类似于：
-        // User1: 大家好
+        // 拼接历史记录字符串，格式类似于：User1: 大家好
         StringBuilder historyBuilder = new StringBuilder();
         for (int i = historyList.size() - 1; i >= 0; i--) {
             ChatMessage msg = historyList.get(i);
@@ -111,9 +111,21 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         for (RoomAiPersona bot : bots) {
             CompletableFuture.runAsync(() -> {
-                // 防刷屏
+                // AI思考效果
+                ChatMessage thinkingMSG = new ChatMessage();
+                thinkingMSG.setRoomId(roomId);
+                thinkingMSG.setSenderId(0L);
+                thinkingMSG.setSenderName(bot.getAiName());
+                thinkingMSG.setContent("思考中...");
+                thinkingMSG.setType("THINKING");
+                thinkingMSG.setCreateTime(LocalDateTime.now());
+
+                chatMessageMapper.insert(thinkingMSG);
+                Long msgId = thinkingMSG.getId();
+
                 try {
                     System.out.println("AI [" + bot.getAiName() + "] (模型: " + bot.getModelName() + ") 准备回复...");
+                    // 防刷屏
                     if (Math.random()>0.6){
                         return;
                     }
@@ -126,6 +138,15 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                             bot.getSystemPrompt(),
                             finalHistory
                     );
+
+                    ChatMessage updateMsg = new ChatMessage();
+                    updateMsg.setId(msgId);
+                    updateMsg.setContent(reply);
+                    updateMsg.setType("AI");
+
+                    chatMessageMapper.updateById(updateMsg);
+                    System.out.println("AI [" + bot.getAiName() + "] 回复更新完毕 (ID: " + msgId + ")");
+
                     if (reply == null || reply.startsWith("(AI连接失败")) {
                         System.err.println("AI [" + bot.getAiName() + "] 回复失败: " + reply);
                         return;
@@ -141,10 +162,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
                     chatMessageMapper.insert(aiMsg);
                     System.out.println(bot.getAiName() + " 已回复");
-                    System.out.println("AI [" + bot.getAiName() + "] 回复成功！");
 
                 } catch (Exception e) {
-                    System.err.println("AI [" + bot.getAiName() + "] 线程异常: " + e.getMessage());
+                    ChatMessage errorMSG = new ChatMessage();
+                    errorMSG.setId(msgId);
+                    errorMSG.setContent("思考过程中断了："+e.getMessage());
+                    errorMSG.setType("AI");
+                    chatMessageMapper.updateById(errorMSG);
                     e.printStackTrace();
                 }
             });
