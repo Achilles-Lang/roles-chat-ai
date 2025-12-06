@@ -76,11 +76,15 @@ public class ChatRoomServiceImpl implements ChatRoomService {
      * 专门用来召唤 AI 的异步方法
      */
     private void triggerAIReply(Long roomId, String userContent) {
+        System.out.println("开始为房间 " + roomId + " 寻找 AI 角色...");
         List<RoomAiPersona> bots = aiPersonaMapper.selectList(
                 new LambdaQueryWrapper<RoomAiPersona>().eq(RoomAiPersona::getRoomId, roomId)
         );
+        System.out.println("房间 " + roomId + " 中共有 " + bots.size() + " 个 AI 角色。");
 
         if (bots.isEmpty()) {
+            System.out.println("房间 " + roomId + " 没有 AI，停止召唤。");
+
             return;
         }
         List<ChatMessage> historyList = chatMessageMapper.selectList(
@@ -107,11 +111,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             CompletableFuture.runAsync(() -> {
                 // 防刷屏
                 try {
+                    System.out.println("AI [" + bot.getAiName() + "] (模型: " + bot.getModelName() + ") 准备回复...");
                     if (Math.random()>0.6){
                         return;
                     }
                     // 随机延迟
-                    Thread.sleep((long) (Math.random() * 3000) + 1000);
+                    Thread.sleep((long) (Math.random() * 300) + 100);
 
                     String reply = aiClient.chatDynamic(
                             bot.getApiKey(),
@@ -119,7 +124,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                             bot.getSystemPrompt(),
                             finalHistory
                     );
-
+                    if (reply == null || reply.startsWith("(AI连接失败")) {
+                        System.err.println("AI [" + bot.getAiName() + "] 回复失败: " + reply);
+                        return;
+                    }
                     // 保存消息
                     ChatMessage aiMsg = new ChatMessage();
                     aiMsg.setRoomId(roomId);
@@ -131,8 +139,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
                     chatMessageMapper.insert(aiMsg);
                     System.out.println(bot.getAiName() + " 已回复");
+                    System.out.println("AI [" + bot.getAiName() + "] 回复成功！");
 
                 } catch (Exception e) {
+                    System.err.println("AI [" + bot.getAiName() + "] 线程异常: " + e.getMessage());
                     e.printStackTrace();
                 }
             });
@@ -162,6 +172,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         persona.setAiAvatar("");
         aiPersonaMapper.insert(persona);
+    }
+
+    @Override
+    public List<RoomAiPersona> getRoomAiList(Long roomId) {
+        return aiPersonaMapper.selectList(
+                new LambdaQueryWrapper<RoomAiPersona>().eq(RoomAiPersona::getRoomId,roomId)
+        );
     }
 
 }

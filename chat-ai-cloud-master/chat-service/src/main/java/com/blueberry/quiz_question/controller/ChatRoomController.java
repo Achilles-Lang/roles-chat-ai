@@ -73,4 +73,12 @@ public class ChatRoomController {
         );
         return Result.success();
     }
+    /**
+     * 水龙头6：获取房间内的 AI 列表
+     * 地址：GET /room/ai/list?roomId=1
+     */
+    @GetMapping("/ai/list")
+    public Result<List<RoomAiPersona>> getRoomAiList(@RequestParam("roomId") Long roomId) {
+        return Result.success(chatRoomService.getRoomAiList(roomId));
+    }
 }
