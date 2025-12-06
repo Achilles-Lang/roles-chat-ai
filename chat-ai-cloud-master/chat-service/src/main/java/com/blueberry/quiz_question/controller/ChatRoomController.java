@@ -18,8 +18,8 @@ public class ChatRoomController {
     private ChatRoomService chatRoomService;
 
     /**
-     * 水龙头1：创建一个新房间
-     * 地址：POST /room/create
+     * 创建一个新房间
+     * POST /room/create
      */
     @PostMapping("/create")
     public Result<ChatRoom> createRoom(@RequestParam("name") String name,
@@ -29,8 +29,8 @@ public class ChatRoomController {
     }
 
     /**
-     * 水龙头2：查看所有房间
-     * 地址：GET /room/list
+     * 查看所有房间
+     * GET /room/list
      */
     @GetMapping("/list")
     public Result<List<ChatRoom>> getRoomList() {
@@ -38,8 +38,8 @@ public class ChatRoomController {
     }
 
     /**
-     * 水龙头3：发送一条消息
-     * 地址：POST /room/send
+     * 发送一条消息
+     * POST /room/send
      */
     @PostMapping("/send")
     public Result<Void> sendMessage(@RequestBody ChatMessage message) {
@@ -54,7 +54,7 @@ public class ChatRoomController {
     }
 
     /**
-     * 水龙头4：获取某个房间的历史消息
+     * 获取某个房间的历史消息
      * 地址：GET /room/messages?roomId=1
      */
     @GetMapping("/messages")
@@ -74,11 +74,46 @@ public class ChatRoomController {
         return Result.success();
     }
     /**
-     * 水龙头6：获取房间内的 AI 列表
+     * 获取房间内的 AI 列表
      * 地址：GET /room/ai/list?roomId=1
      */
     @GetMapping("/ai/list")
     public Result<List<RoomAiPersona>> getRoomAiList(@RequestParam("roomId") Long roomId) {
         return Result.success(chatRoomService.getRoomAiList(roomId));
+    }
+    /**
+     * 删除房间内的 AI
+     * 地址：DELETE /room/ai/delete?aiId=1
+     */
+    @DeleteMapping("/ai/delete")
+    public Result<Void> deleteRoomAi(@RequestParam("aiId") Long aiId) {
+        chatRoomService.deleteRoomAi(aiId);
+        return Result.success();
+    }
+    /**
+     * 水龙头8：删除房间
+     * 地址：DELETE /room/delete?roomId=1
+     */
+    @DeleteMapping("/delete")
+    public Result<Void> deleteRoom(@RequestParam("roomId") Long roomId) {
+        chatRoomService.deleteRoom(roomId);
+        return Result.success();
+    }
+    /**
+     * 水龙头9：修改房间名
+     */
+    @PutMapping("/rename")
+    public Result<Void> renameRoom(@RequestParam("roomId") Long roomId, @RequestParam("newName") String newName) {
+        chatRoomService.renameRoom(roomId, newName);
+        return Result.success();
+    }
+
+    /**
+     * 水龙头10：置顶/取消置顶
+     */
+    @PutMapping("/pin")
+    public Result<Void> pinRoom(@RequestParam("roomId") Long roomId) {
+        chatRoomService.togglePinRoom(roomId);
+        return Result.success();
     }
 }

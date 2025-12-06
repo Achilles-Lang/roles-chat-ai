@@ -22,4 +22,12 @@ public interface ChatRoomService {
     void addAiToRoom(Long roomId, String aiName,String prompt,String apiKey,String modelName);
     // 获取房间内的所有AI角色
     List<RoomAiPersona> getRoomAiList(Long roomId);
+    // 踢出房间内AI角色
+    void deleteRoomAi(Long aiId);
+    // 删除房间
+    void deleteRoom(Long roomId);
+    // 修改房间名
+    void renameRoom(Long roomId, String newName);
+    // 置顶/取消置顶房间
+    void togglePinRoom(Long roomId);
 }

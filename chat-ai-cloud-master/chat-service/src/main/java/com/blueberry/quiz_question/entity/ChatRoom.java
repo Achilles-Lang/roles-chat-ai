@@ -21,6 +21,8 @@ public class ChatRoom {
     private Long creatorId;
     // 创建时间
     private LocalDateTime createTime;
+    // 是否置顶
+    private Boolean isPinned;
 
     public Long getId() {
         return id;
@@ -60,5 +62,13 @@ public class ChatRoom {
 
     public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
+    }
+
+    public Boolean getIsPinned() {
+        return isPinned;
+    }
+
+    public void setIsPinned(Boolean pinned) {
+        isPinned = pinned;
     }
 }

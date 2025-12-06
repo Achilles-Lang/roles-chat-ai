@@ -44,7 +44,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public List<ChatRoom> getRoomList() {
         return chatRoomMapper.selectList(
-                new LambdaQueryWrapper<ChatRoom>().orderByDesc(ChatRoom::getCreateTime)
+                new LambdaQueryWrapper<ChatRoom>()
+                        .orderByDesc(ChatRoom::getIsPinned)
+                        .orderByDesc(ChatRoom::getCreateTime)
         );
     }
 
@@ -179,6 +181,49 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return aiPersonaMapper.selectList(
                 new LambdaQueryWrapper<RoomAiPersona>().eq(RoomAiPersona::getRoomId,roomId)
         );
+    }
+
+    /**
+     * 踢出AI角色
+     * @param aiId
+     */
+    @Override
+    public void deleteRoomAi(Long aiId) {
+        aiPersonaMapper.deleteById(aiId);
+    }
+    /**
+     * 删除房间
+     * @param roomId
+     */
+    @Override
+    public void deleteRoom(Long roomId) {
+        chatRoomMapper.deleteById(roomId);
+    }
+    /**
+     * 重命名房间
+     * @param roomId
+     * @param newName
+     */
+    @Override
+    public void renameRoom(Long roomId, String newName) {
+        ChatRoom room  = new ChatRoom();
+        room.setId(roomId);
+        room.setRoomName(newName);
+        chatRoomMapper.updateById(room);
+    }
+    /**
+     * 置顶房间
+     * @param roomId
+     */
+    @Override
+    public void togglePinRoom(Long roomId) {
+        ChatRoom room = chatRoomMapper.selectById(roomId);
+        if(room != null){
+            // 取反
+            boolean currentPinnedStatus = Boolean.TRUE.equals(room.getIsPinned());
+            room.setIsPinned(!currentPinnedStatus);
+            chatRoomMapper.updateById(room);
+        }
     }
 
 }
