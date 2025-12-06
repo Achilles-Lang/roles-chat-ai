@@ -224,17 +224,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         chatRoomMapper.deleteById(roomId);
     }
     /**
-     * 重命名房间
-     * @param roomId
-     * @param newName
+     * 更新房间的信息
+     * @param room
      */
     @Override
-    public void renameRoom(Long roomId, String newName) {
-        ChatRoom room  = new ChatRoom();
-        room.setId(roomId);
-        room.setRoomName(newName);
+    public void updateRoomInfo(ChatRoom room) {
         chatRoomMapper.updateById(room);
     }
+
     /**
      * 置顶房间
      * @param roomId

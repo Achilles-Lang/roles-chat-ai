@@ -23,6 +23,8 @@ public class ChatRoom {
     private LocalDateTime createTime;
     // 是否置顶
     private Boolean isPinned;
+    // 群头像
+    private String avatar;
 
     public Long getId() {
         return id;
@@ -70,5 +72,13 @@ public class ChatRoom {
 
     public void setIsPinned(Boolean pinned) {
         isPinned = pinned;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 }

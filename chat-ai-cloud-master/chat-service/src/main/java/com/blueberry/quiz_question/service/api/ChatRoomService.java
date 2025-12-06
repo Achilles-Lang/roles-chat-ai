@@ -26,8 +26,8 @@ public interface ChatRoomService {
     void deleteRoomAi(Long aiId);
     // 删除房间
     void deleteRoom(Long roomId);
-    // 修改房间名
-    void renameRoom(Long roomId, String newName);
+    // 更新房间的信息
+    void updateRoomInfo(ChatRoom room);
     // 置顶/取消置顶房间
     void togglePinRoom(Long roomId);
 }

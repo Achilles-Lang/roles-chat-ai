@@ -100,20 +100,19 @@ public class ChatRoomController {
         return Result.success();
     }
     /**
-     * 水龙头9：修改房间名
-     */
-    @PutMapping("/rename")
-    public Result<Void> renameRoom(@RequestParam("roomId") Long roomId, @RequestParam("newName") String newName) {
-        chatRoomService.renameRoom(roomId, newName);
-        return Result.success();
-    }
-
-    /**
      * 水龙头10：置顶/取消置顶
      */
     @PutMapping("/pin")
     public Result<Void> pinRoom(@RequestParam("roomId") Long roomId) {
         chatRoomService.togglePinRoom(roomId);
+        return Result.success();
+    }
+    /**
+     * 水龙头11：全能更新房间的信息
+     */
+    @PostMapping("/update")
+    public Result<Void> updateRoom(@RequestBody ChatRoom room) {
+        chatRoomService.updateRoomInfo(room);
         return Result.success();
     }
 }
