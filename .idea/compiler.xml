@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
+    <excludeFromCompile>
+      <directory url="file://$PROJECT_DIR$/chat-ai-cloud-master/chat-feedback/src/main/resources/archetype-resources" includeSubdirectories="true" />
+    </excludeFromCompile>
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
@@ -8,6 +11,8 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="chat-user" />
+        <module name="chat-feedback" />
+        <module name="chat-knowledge" />
         <module name="chat-common" />
         <module name="chat-gateway" />
       </profile>
@@ -16,6 +21,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
+          <entry name="$PROJECT_DIR$/../../ProgrameDevelopementData/JavaDevelopment/MAVEN/maven_repository/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
           <entry name="$PROJECT_DIR$/../../ProgrameDevelopementData/JavaDevelopment/MAVEN/maven_repository/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
         </processorPath>
         <module name="chat-service" />
@@ -30,6 +36,8 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="chat-feedback" options="" />
+      <module name="chat-knowledge" options="" />
       <module name="chat-question" options="-parameters" />
       <module name="chat-service" options="-parameters" />
     </option>

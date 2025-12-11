@@ -14,7 +14,7 @@ public interface ChatRoomService {
     List<ChatRoom> getRoomList();
 
     // 发送一条消息
-    void sendMessage(Long roomId, Long senderId, String senderName, String content,String type);
+    void sendMessage(Long roomId, Long senderId, String senderName, String content,String type,Long replyId);
 
     // 获取某个房间的历史消息
     List<ChatMessage> getHistoryMessages(Long roomId);
@@ -30,4 +30,6 @@ public interface ChatRoomService {
     void updateRoomInfo(ChatRoom room);
     // 置顶/取消置顶房间
     void togglePinRoom(Long roomId);
+    // 删除消息
+    void deleteMessage(Long messageId);
 }

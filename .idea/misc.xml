@@ -8,6 +8,8 @@
         <option value="$PROJECT_DIR$/chat-ai-cloud-master/quiz-user/pom.xml" />
         <option value="$PROJECT_DIR$/chat-ai-cloud-master/pom.xml" />
         <option value="$PROJECT_DIR$/chat-ai-cloud-master/quiz-question/pom.xml" />
+        <option value="$PROJECT_DIR$/chat-ai-cloud-master/chat-feedback/pom.xml" />
+        <option value="$PROJECT_DIR$/chat-ai-cloud-master/chat-knoledge/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

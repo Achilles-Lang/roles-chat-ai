@@ -54,7 +54,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public void sendMessage(Long roomId, Long senderId, String senderName, String content,String type) {
+    public void sendMessage(Long roomId, Long senderId, String senderName, String content,String type,Long replyToId) {
         System.out.println("收到消息 -> 类型: " + type + ", 内容长度: " + (content != null ? content.length() : 0));
 
         // 先保存用户发的消息
@@ -63,6 +63,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         userMsg.setSenderId(senderId);
         userMsg.setSenderName(senderName);
         userMsg.setContent(content);
+        userMsg.setReplyToId(replyToId);
+        userMsg.setIsDeleted(0);
         userMsg.setType(type != null ? type : "TEXT");
 
         userMsg.setCreateTime(LocalDateTime.now());
@@ -78,6 +80,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
      * 专门用来召唤 AI 的异步方法
      */
     private void triggerAIReply(Long roomId, String userContent) {
+
         System.out.println("开始为房间 " + roomId + " 寻找 AI 角色...");
         List<RoomAiPersona> bots = aiPersonaMapper.selectList(
                 new LambdaQueryWrapper<RoomAiPersona>().eq(RoomAiPersona::getRoomId, roomId)
@@ -129,35 +132,52 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                     // 随机延迟
                     Thread.sleep((long) (Math.random() * 300) + 100);
 
-                    String reply = aiClient.chatDynamic(
-                            bot.getApiKey(),
-                            bot.getModelName(),
-                            bot.getSystemPrompt(),
-                            finalHistory
-                    );
+                    String replyContent = "";
+                    String msgType = "AI";
+                    String modelName = bot.getModelName();
+
+                    if(modelName != null && modelName.toLowerCase().startsWith("wanx")){
+                        System.out.println("AI [" + bot.getAiName() + "] 正在绘画: " + userContent);
+
+                        replyContent = aiClient.generateImage(bot.getApiKey(), userContent);
+
+                        if(replyContent.startsWith("https:")){
+                            msgType = "IMAGE";
+                        }
+                    } else {
+                        replyContent = aiClient.chatDynamic(
+                                bot.getApiKey(),
+                                bot.getModelName(),
+                                bot.getSystemPrompt(),
+                                finalHistory
+                        );
+
+                    }
+
+
 
                     ChatMessage updateMsg = new ChatMessage();
                     updateMsg.setId(msgId);
-                    updateMsg.setContent(reply);
-                    updateMsg.setType("AI");
+                    updateMsg.setContent(replyContent);
+                    updateMsg.setType(msgType);
 
                     chatMessageMapper.updateById(updateMsg);
                     System.out.println("AI [" + bot.getAiName() + "] 回复更新完毕 (ID: " + msgId + ")");
 
-                    if (reply == null || reply.startsWith("(AI连接失败")) {
-                        System.err.println("AI [" + bot.getAiName() + "] 回复失败: " + reply);
+                    if (replyContent == null || replyContent.startsWith("(AI连接失败")) {
+                        System.err.println("AI [" + bot.getAiName() + "] 回复失败: " + replyContent);
                         return;
                     }
                     // 保存消息
-                    ChatMessage aiMsg = new ChatMessage();
+/*                    ChatMessage aiMsg = new ChatMessage();
                     aiMsg.setRoomId(roomId);
                     aiMsg.setSenderId(0L);
                     aiMsg.setSenderName(bot.getAiName());
-                    aiMsg.setContent(reply);
+                    aiMsg.setContent(replyContent);
                     aiMsg.setType("AI");
                     aiMsg.setCreateTime(LocalDateTime.now());
 
-                    chatMessageMapper.insert(aiMsg);
+                    chatMessageMapper.insert(aiMsg);*/
                     System.out.println(bot.getAiName() + " 已回复");
 
                 } catch (Exception e) {
@@ -242,6 +262,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             room.setIsPinned(!currentPinnedStatus);
             chatRoomMapper.updateById(room);
         }
+    }
+
+    @Override
+    public void deleteMessage(Long messageId) {
+        chatMessageMapper.deleteById(messageId);
     }
 
 }

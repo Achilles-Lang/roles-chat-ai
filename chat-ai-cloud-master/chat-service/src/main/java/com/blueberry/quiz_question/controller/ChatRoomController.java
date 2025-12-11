@@ -49,7 +49,8 @@ public class ChatRoomController {
                 message.getSenderId(),
                 message.getSenderName(),
                 message.getContent(),
-                message.getType()
+                message.getType(),
+                message.getReplyToId()
         );
         return Result.success();
     }
@@ -69,7 +70,7 @@ public class ChatRoomController {
                 aiPersona.getRoomId(),
                 aiPersona.getAiName(),
                 aiPersona.getSystemPrompt(),
-                aiPersona.getApiKey(),    // 传这俩新参数
+                aiPersona.getApiKey(),
                 aiPersona.getModelName()
         );
         return Result.success();
@@ -115,5 +116,12 @@ public class ChatRoomController {
     public Result<Void> updateRoom(@RequestBody ChatRoom room) {
         chatRoomService.updateRoomInfo(room);
         return Result.success();
+    }
+
+    @DeleteMapping("/message/delete")
+    public Result<Void> deleteMessage(@RequestParam("msgId") Long msgId) {
+        chatRoomService.deleteMessage(msgId);
+        return Result.success();
+
     }
 }

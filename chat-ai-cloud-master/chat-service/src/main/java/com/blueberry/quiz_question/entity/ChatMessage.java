@@ -1,16 +1,18 @@
 package com.blueberry.quiz_question.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 聊天消息实体类
  */
 @TableName("chat_message")
 public class ChatMessage {
+    @TableField(exist = false)
+    private List<Map<String, Object>> reactions;
     @TableId(type = IdType.AUTO)
     private Long id;
     // 房间ID
@@ -25,6 +27,11 @@ public class ChatMessage {
     private String type;
     // 发送时间
     private LocalDateTime createTime;
+    // 回复哪条消息
+    private Long replyToId;
+    // 是否删除
+    @TableLogic
+    private Integer isDeleted;
 
     public Long getId() {
         return id;
@@ -80,5 +87,29 @@ public class ChatMessage {
 
     public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
+    }
+
+    public List<Map<String, Object>> getReactions() {
+        return reactions;
+    }
+
+    public void setReactions(List<Map<String, Object>> reactions) {
+        this.reactions = reactions;
+    }
+
+    public Long getReplyToId() {
+        return replyToId;
+    }
+
+    public void setReplyToId(Long replyToId) {
+        this.replyToId = replyToId;
+    }
+
+    public Integer getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
     }
 }

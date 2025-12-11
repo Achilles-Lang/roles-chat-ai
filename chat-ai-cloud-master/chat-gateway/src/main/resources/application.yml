@@ -38,5 +38,13 @@ spring:
           uri: http://localhost:8083
           predicates:
             - Path=/room/**
+        - id: chat-feedback-route
+          uri: http://localhost:8084
+          predicates:
+            - Path=/feedback/**
+        - id: chat-knowledge-route
+          uri: http://localhost:8085
+          predicates:
+              - Path=/doc/**
   codec:
     max-in-memory-size: 16MB
