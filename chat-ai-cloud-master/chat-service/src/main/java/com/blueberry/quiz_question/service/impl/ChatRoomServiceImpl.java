@@ -11,7 +11,6 @@ import com.blueberry.quiz_question.mapper.RoomAiPersonaMapper;
 import com.blueberry.quiz_question.service.api.ChatRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.View;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,8 +32,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Autowired
     private RoomAiPersonaMapper aiPersonaMapper;
-    @Autowired
-    private View error;
 
     @Override
     public ChatRoom createRoom(String name, Long creatorId) {
@@ -56,10 +53,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public void sendMessage(Long roomId, Long senderId, String senderName, String content,String type,Long replyToId) {
+    public void sendMessage(Long roomId, Long senderId, String senderName, String content, String type, Long replyToId) {
         System.out.println("收到消息 -> 类型: " + type + ", 内容长度: " + (content != null ? content.length() : 0));
 
-        // 先保存用户发的消息
+        // 1. 先保存用户发的消息
         ChatMessage userMsg = new ChatMessage();
         userMsg.setRoomId(roomId);
         userMsg.setSenderId(senderId);
@@ -68,18 +65,20 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         userMsg.setReplyToId(replyToId);
         userMsg.setIsDeleted(0);
         userMsg.setType(type != null ? type : "TEXT");
-
         userMsg.setCreateTime(LocalDateTime.now());
+
         chatMessageMapper.insert(userMsg);
 
-        if("TEXT".equals(userMsg.getType()) && !"AI助手".equals(senderName)){
+        // 2. 只有文本消息且发送者不是AI助手时，才触发AI回复
+        if ("TEXT".equals(userMsg.getType()) && !"AI助手".equals(senderName)) {
             System.out.println("正在准备召唤 AI...");
             triggerAIReply(roomId, content);
         }
     }
 
     /**
-     * 专门用来召唤 AI 的异步方法
+     * 专门用来召唤 AI 的方法
+     * 修复核心：先在主线程插入“思考中”，再异步去更新内容
      */
     private void triggerAIReply(Long roomId, String userContent) {
 
@@ -87,21 +86,23 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         List<RoomAiPersona> bots = aiPersonaMapper.selectList(
                 new LambdaQueryWrapper<RoomAiPersona>().eq(RoomAiPersona::getRoomId, roomId)
         );
-        System.out.println("房间 " + roomId + " 中共有 " + bots.size() + " 个 AI 角色。");
 
         if (bots.isEmpty()) {
             System.out.println("房间 " + roomId + " 没有 AI，停止召唤。");
             return;
         }
+
+        // 准备历史记录 (这一步还在主线程)
         List<ChatMessage> historyList = chatMessageMapper.selectList(
                 new LambdaQueryWrapper<ChatMessage>()
                         .eq(ChatMessage::getRoomId, roomId)
-                        .orderByDesc(ChatMessage::getCreateTime) // 倒序查，取最新的
+                        .orderByDesc(ChatMessage::getCreateTime)
                         .last("LIMIT 10")
         );
 
-        // 拼接历史记录字符串，格式类似于：User1: 大家好
+        // 拼接历史记录字符串
         StringBuilder historyBuilder = new StringBuilder();
+        // 因为查出来是倒序(最新在最前)，所以要反向遍历拼接，变成正常的时间顺序
         for (int i = historyList.size() - 1; i >= 0; i--) {
             ChatMessage msg = historyList.get(i);
             historyBuilder.append(msg.getSenderName()).append(": ").append(msg.getContent()).append("\n");
@@ -111,39 +112,39 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 "\n【用户的最新发言】：\n" + userContent +
                 "\n【请你根据历史记录接话】";
 
+        // 遍历所有机器人
         for (RoomAiPersona bot : bots) {
+
+            // =================================================================
+            // 【重点修复】在主线程立刻插入“思考中”消息
+            // 这样前端发送完消息立刻请求列表时，数据库里已经有这条消息了！
+            // =================================================================
+            ChatMessage thinkingMSG = new ChatMessage();
+            thinkingMSG.setRoomId(roomId);
+            thinkingMSG.setSenderId(0L); // 0 表示 AI
+            thinkingMSG.setSenderName(bot.getAiName());
+            thinkingMSG.setContent("思考中...");
+            thinkingMSG.setType("THINKING");
+            thinkingMSG.setCreateTime(LocalDateTime.now());
+
+            chatMessageMapper.insert(thinkingMSG);
+            Long msgId = thinkingMSG.getId(); // 拿到插入后的 ID，传给异步线程
+
+            // 开启异步线程去调用大模型
             CompletableFuture.runAsync(() -> {
-                // AI思考效果
-                ChatMessage thinkingMSG = new ChatMessage();
-                thinkingMSG.setRoomId(roomId);
-                thinkingMSG.setSenderId(0L);
-                thinkingMSG.setSenderName(bot.getAiName());
-                thinkingMSG.setContent("思考中...");
-                thinkingMSG.setType("THINKING");
-                thinkingMSG.setCreateTime(LocalDateTime.now());
-
-                chatMessageMapper.insert(thinkingMSG);
-                Long msgId = thinkingMSG.getId();
-
                 try {
-                    System.out.println("AI [" + bot.getAiName() + "] (模型: " + bot.getModelName() + ") 准备回复...");
-                    // 防刷屏
-                    if (Math.random()>0.6){
-                        return;
-                    }
-                    // 随机延迟
-                    Thread.sleep((long) (Math.random() * 300) + 100);
+                    System.out.println("AI [" + bot.getAiName() + "] 正在思考 (ID: " + msgId + ")...");
+
+                    // 模拟思考延迟，让动画多展示一会
+                    Thread.sleep((long) (Math.random() * 500) + 200);
 
                     String replyContent = "";
                     String msgType = "AI";
-                    String modelName = bot.getModelName();
 
-                    if(modelName != null && modelName.toLowerCase().startsWith("wanx")){
-                        System.out.println("AI [" + bot.getAiName() + "] 正在绘画: " + userContent);
-
+                    // 调用 AI 接口
+                    if(bot.getModelName() != null && bot.getModelName().toLowerCase().startsWith("wanx")){
                         replyContent = aiClient.generateImage(bot.getApiKey(), userContent);
-
-                        if(replyContent.startsWith("https:")){
+                        if(replyContent.startsWith("https:")) {
                             msgType = "IMAGE";
                         }
                     } else {
@@ -153,42 +154,28 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                                 bot.getSystemPrompt(),
                                 finalHistory
                         );
-
                     }
 
-
-
+                    // =================================================================
+                    // 【重点修复】只执行 updateById，绝对不要再 insert 了！
+                    // =================================================================
                     ChatMessage updateMsg = new ChatMessage();
-                    updateMsg.setId(msgId);
+                    updateMsg.setId(msgId); // 锁定刚才那条“思考中”的消息
                     updateMsg.setContent(replyContent);
                     updateMsg.setType(msgType);
+                    // updateMsg.setCreateTime(LocalDateTime.now()); // 可选：更新为回复时间
 
                     chatMessageMapper.updateById(updateMsg);
-                    System.out.println("AI [" + bot.getAiName() + "] 回复更新完毕 (ID: " + msgId + ")");
-
-                    if (replyContent == null || replyContent.startsWith("(AI连接失败")) {
-                        System.err.println("AI [" + bot.getAiName() + "] 回复失败: " + replyContent);
-                        return;
-                    }
-                    // 保存消息
-                    ChatMessage aiMsg = new ChatMessage();
-                    aiMsg.setRoomId(roomId);
-                    aiMsg.setSenderId(0L);
-                    aiMsg.setSenderName(bot.getAiName());
-                    aiMsg.setContent(replyContent);
-                    aiMsg.setType("AI");
-                    aiMsg.setCreateTime(LocalDateTime.now());
-
-                    chatMessageMapper.insert(aiMsg);
-                    System.out.println(bot.getAiName() + " 已回复");
+                    System.out.println("AI [" + bot.getAiName() + "] 回复更新完毕");
 
                 } catch (Exception e) {
+                    e.printStackTrace();
+                    // 发生异常也要更新消息，告诉用户出错了
                     ChatMessage errorMSG = new ChatMessage();
                     errorMSG.setId(msgId);
-                    errorMSG.setContent("思考过程中断了："+e.getMessage());
+                    errorMSG.setContent("思考中断：" + e.getMessage());
                     errorMSG.setType("AI");
                     chatMessageMapper.updateById(errorMSG);
-                    e.printStackTrace();
                 }
             });
         }
@@ -196,10 +183,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     public List<ChatMessage> getHistoryMessages(Long roomId) {
+        // 1. 先按时间倒序（DESC）查询，确保拿到的是“最新”的 50 条
         List<ChatMessage> list = chatMessageMapper.selectList(
                 new LambdaQueryWrapper<ChatMessage>()
                         .eq(ChatMessage::getRoomId, roomId)
-                        .orderByDesc(ChatMessage::getCreateTime) // 改为倒序
+                        .orderByDesc(ChatMessage::getCreateTime)
                         .last("LIMIT 50")
         );
 
@@ -208,8 +196,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             return list;
         }
 
-        // 3. 在内存中反转列表，恢复成“旧->新”的时间顺序，以便前端渲染
-        // ArrayList 支持修改，如果 MyBatis 返回的是不可变 List 可能会报错，所以建议包装一下（虽然通常 MyBatis 返回的是 ArrayList）
+        // 3. 在内存中反转列表，恢复成“旧->新”的时间顺序
         List<ChatMessage> result = new ArrayList<>(list);
         Collections.reverse(result);
 
@@ -222,11 +209,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         persona.setRoomId(roomId);
         persona.setAiName(aiName);
         persona.setSystemPrompt(prompt);
-
-        // 新增的两个字段
         persona.setApiKey(apiKey);
         persona.setModelName(modelName);
-
         persona.setAiAvatar("");
         aiPersonaMapper.insert(persona);
     }
@@ -234,44 +218,29 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public List<RoomAiPersona> getRoomAiList(Long roomId) {
         return aiPersonaMapper.selectList(
-                new LambdaQueryWrapper<RoomAiPersona>().eq(RoomAiPersona::getRoomId,roomId)
+                new LambdaQueryWrapper<RoomAiPersona>().eq(RoomAiPersona::getRoomId, roomId)
         );
     }
 
-    /**
-     * 踢出AI角色
-     * @param aiId
-     */
     @Override
     public void deleteRoomAi(Long aiId) {
         aiPersonaMapper.deleteById(aiId);
     }
-    /**
-     * 删除房间
-     * @param roomId
-     */
+
     @Override
     public void deleteRoom(Long roomId) {
         chatRoomMapper.deleteById(roomId);
     }
-    /**
-     * 更新房间的信息
-     * @param room
-     */
+
     @Override
     public void updateRoomInfo(ChatRoom room) {
         chatRoomMapper.updateById(room);
     }
 
-    /**
-     * 置顶房间
-     * @param roomId
-     */
     @Override
     public void togglePinRoom(Long roomId) {
         ChatRoom room = chatRoomMapper.selectById(roomId);
         if(room != null){
-            // 取反
             boolean currentPinnedStatus = Boolean.TRUE.equals(room.getIsPinned());
             room.setIsPinned(!currentPinnedStatus);
             chatRoomMapper.updateById(room);
@@ -282,5 +251,4 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public void deleteMessage(Long messageId) {
         chatMessageMapper.deleteById(messageId);
     }
-
 }
