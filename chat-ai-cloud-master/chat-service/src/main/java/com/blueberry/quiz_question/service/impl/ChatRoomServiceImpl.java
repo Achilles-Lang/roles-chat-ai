@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.View;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -169,7 +171,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                         return;
                     }
                     // 保存消息
-/*                    ChatMessage aiMsg = new ChatMessage();
+                    ChatMessage aiMsg = new ChatMessage();
                     aiMsg.setRoomId(roomId);
                     aiMsg.setSenderId(0L);
                     aiMsg.setSenderName(bot.getAiName());
@@ -177,7 +179,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                     aiMsg.setType("AI");
                     aiMsg.setCreateTime(LocalDateTime.now());
 
-                    chatMessageMapper.insert(aiMsg);*/
+                    chatMessageMapper.insert(aiMsg);
                     System.out.println(bot.getAiName() + " 已回复");
 
                 } catch (Exception e) {
@@ -194,12 +196,24 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     public List<ChatMessage> getHistoryMessages(Long roomId) {
-        return chatMessageMapper.selectList(
+        List<ChatMessage> list = chatMessageMapper.selectList(
                 new LambdaQueryWrapper<ChatMessage>()
                         .eq(ChatMessage::getRoomId, roomId)
-                        .orderByAsc(ChatMessage::getCreateTime)
+                        .orderByDesc(ChatMessage::getCreateTime) // 改为倒序
                         .last("LIMIT 50")
         );
+
+        // 2. 如果列表为空，直接返回
+        if (list == null || list.isEmpty()) {
+            return list;
+        }
+
+        // 3. 在内存中反转列表，恢复成“旧->新”的时间顺序，以便前端渲染
+        // ArrayList 支持修改，如果 MyBatis 返回的是不可变 List 可能会报错，所以建议包装一下（虽然通常 MyBatis 返回的是 ArrayList）
+        List<ChatMessage> result = new ArrayList<>(list);
+        Collections.reverse(result);
+
+        return result;
     }
 
     @Override
