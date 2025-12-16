@@ -1,6 +1,7 @@
 package com.blueberry.quiz_question.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -9,11 +10,12 @@ import java.util.Map;
 /**
  * 聊天消息实体类
  */
-@TableName("chat_message")
+@TableName(value = "chat_message",autoResultMap = true)
 public class ChatMessage {
     @TableField(exist = false)
     private List<Map<String, Object>> reactions;
     @TableId(type = IdType.AUTO)
+    // 主键
     private Long id;
     // 房间ID
     private Long roomId;
@@ -29,9 +31,13 @@ public class ChatMessage {
     private LocalDateTime createTime;
     // 回复哪条消息
     private Long replyToId;
+    @TableField(exist = false)
+    private ChatMessage replyToMessage;
     // 是否删除
     @TableLogic
     private Integer isDeleted;
+    @TableField(value = "extra_data", typeHandler = JacksonTypeHandler.class)
+    private Map<String, Object> extraData;
 
     public Long getId() {
         return id;
@@ -111,5 +117,21 @@ public class ChatMessage {
 
     public void setIsDeleted(Integer isDeleted) {
         this.isDeleted = isDeleted;
+    }
+
+    public ChatMessage getReplyToMessage() {
+        return replyToMessage;
+    }
+
+    public void setReplyToMessage(ChatMessage replyToMessage) {
+        this.replyToMessage = replyToMessage;
+    }
+
+    public Map<String, Object> getExtraData() {
+        return extraData;
+    }
+
+    public void setExtraData(Map<String, Object> extraData) {
+        this.extraData = extraData;
     }
 }

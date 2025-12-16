@@ -32,4 +32,8 @@ public interface ChatRoomService {
     void togglePinRoom(Long roomId);
     // 删除消息
     void deleteMessage(Long messageId);
+    // 更新AI信息
+    void updateRoomAi(RoomAiPersona aiPersona);
+    // 置顶/取消置顶AI
+    void togglePinAi(Long aiId);
 }

@@ -18,6 +18,15 @@ public class RoomAiPersona {
     private String apiKey;
     // 自定义模型
     private String modelName;
+    private Boolean isPinned;
+
+    public Boolean getIsPinned() {
+        return isPinned;
+    }
+
+    public void setIsPinned(Boolean pinned) {
+        isPinned = pinned;
+    }
 
     public Long getId() {
         return id;

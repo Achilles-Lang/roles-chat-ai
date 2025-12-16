@@ -124,4 +124,21 @@ public class ChatRoomController {
         return Result.success();
 
     }
+    /**
+     * 更新 AI 信息 (设置)
+     */
+    @PostMapping("/ai/update")
+    public Result<Void> updateRoomAi(@RequestBody RoomAiPersona aiPersona) {
+        chatRoomService.updateRoomAi(aiPersona);
+        return Result.success();
+    }
+
+    /**
+     * 置顶/取消置顶 AI
+     */
+    @PutMapping("/ai/pin")
+    public Result<Void> pinAi(@RequestParam("aiId") Long aiId) {
+        chatRoomService.togglePinAi(aiId);
+        return Result.success();
+    }
 }
