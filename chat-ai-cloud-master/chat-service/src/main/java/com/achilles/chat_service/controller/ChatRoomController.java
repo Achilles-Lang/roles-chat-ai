@@ -7,7 +7,7 @@ import com.achilles.chat_service.entity.RoomAiPersona;
 import com.achilles.chat_service.service.api.ChatRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
@@ -22,12 +22,8 @@ public class ChatRoomController {
      * POST /room/create
      */
     @PostMapping("/create")
-    public Result<ChatRoom> createRoom(@RequestBody ChatRoom room) {
-        // 1. 获取当前登录用户 ID
-        // 你的项目中应该有获取当前用户的方法，比如 Sa-Token 的 StpUtil.getLoginIdAsLong()
-        // 或者从请求头获取，例如:
-        Long userId = StpUtil.getLoginIdAsLong();
-        // 2. 调用修改后的 Service (传入整个 room 对象和 userId)
+    public Result<ChatRoom> createRoom(@RequestBody ChatRoom room,@RequestHeader("userId") Long userId) {
+
         ChatRoom newRoom = chatRoomService.createRoom(room, userId);
 
         return Result.success(newRoom);

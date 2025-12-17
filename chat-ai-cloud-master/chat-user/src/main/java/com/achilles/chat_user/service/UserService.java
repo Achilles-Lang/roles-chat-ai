@@ -1,4 +1,4 @@
-package com.blueberry.quiz_user.service;
+package com.achilles.chat_user.service;
 
 import com.achilles.model.user.UserDTO;
 import com.achilles.model.user.UserVO;

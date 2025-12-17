@@ -1,4 +1,4 @@
-package com.blueberry.quiz_user.exception;
+package com.achilles.chat_user.exception;
 
 import com.achilles.model.common.Result;
 import org.springframework.web.bind.annotation.ExceptionHandler;

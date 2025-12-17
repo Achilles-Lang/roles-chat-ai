@@ -1,4 +1,4 @@
-package com.blueberry.quiz_user;
+package com.achilles.chat_user;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -7,7 +7,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@MapperScan("com.blueberry.quiz_user.mapper")
+@MapperScan("com.achilles.chat_user.mapper")
 public class ChatUserApplication {
 
     public static void main(String[] args) {

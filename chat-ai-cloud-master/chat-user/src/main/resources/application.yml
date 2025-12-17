@@ -10,14 +10,14 @@ spring:
       idle-timeout: 300000
       connection-timeout: 30000
   application:
-    name: quiz-user
+    name: chat-user
   cloud:
     nacos:
-      server-addr: 1.15.105.45:8848
+      server-addr: localhost:8848
       username: nacos
-      password: 123456
+      password: nacos
       discovery:
-        group: QUIZ_GROUP
+        group: CHAT_GROUP
         enabled: true
   profiles:
     active: dev
@@ -31,7 +31,7 @@ server:
   port: 8082
 mybatis:
   mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.blueberry.quiz_user.entity
+  type-aliases-package: com.achilles.chat_user.entity
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
@@ -45,12 +45,12 @@ springdoc:
   group-configs:
     - group: 'default'
       paths-to-match: '/**'
-      packages-to-scan: com.blueberry.quiz_user.controller
+      packages-to-scan: com.achilles.chat_user.controller
 dubbo:
   application:
     name: ${spring.application.name}
   registry:
-    address: nacos:1.15.105.45:8848
+    address: nacos:localhost:8848
   protocol:
     name: dubbo
     port: -1

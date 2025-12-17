@@ -1,13 +1,13 @@
-package com.blueberry.quiz_user.service.impl;
+package com.achilles.chat_user.service.impl;
 
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.achilles.model.user.UserDTO;
 import com.achilles.model.user.UserVO;
-import com.blueberry.quiz_user.entity.UserTO;
-import com.blueberry.quiz_user.exception.UserException;
-import com.blueberry.quiz_user.mapper.UserMapper;
-import com.blueberry.quiz_user.service.UserService;
+import com.achilles.chat_user.entity.UserTO;
+import com.achilles.chat_user.exception.UserException;
+import com.achilles.chat_user.mapper.UserMapper;
+import com.achilles.chat_user.service.UserService;
 import org.springframework.stereotype.Service;
 
 @Service

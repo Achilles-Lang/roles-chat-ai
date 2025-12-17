@@ -2,13 +2,13 @@ server:
   port: 8081
 spring:
   application:
-    name: quiz-gateway
+    name: chat-gateway
   cloud:
     nacos:
       discovery:
-        server-addr: 1.15.105.45:8848
+        server-addr: localhost:8848
         username: nacos
-        password: 123456
+        password: nacos
     gateway:
       globalcors:
         cors-configurations:

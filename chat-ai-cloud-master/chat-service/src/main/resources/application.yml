@@ -19,11 +19,11 @@ spring:
           model: qwen-plus
   cloud:
     nacos:
-      server-addr: 1.15.105.45:8848
+      server-addr: localhost:8848
       username: nacos
-      password: 123456
+      password: nacos
       discovery:
-        group: QUIZ_GROUP
+        group: CHAT_GROUP
         enabled: true
   profiles:
     active: dev
@@ -39,7 +39,7 @@ server:
     max-http-form-post-size: 16MB
 mybatis:
   mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.blueberry.quiz_question.entity
+  type-aliases-package: com.achilles.chat-service.entity
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
@@ -50,15 +50,11 @@ springdoc:
     operations-sorter: alpha
   api-docs:
     path: /v3/api-docs
-  group-configs:
-    - group: 'default'
-      paths-to-match: '/**'
-      packages-to-scan: com.blueberry.quiz_question.controller
 dubbo:
   application:
     name: ${spring.application.name}
   registry:
-    address: nacos:1.15.105.45:8848
+    address: nacos:localhost:8848
   protocol:
     name: dubbo
     port: -1

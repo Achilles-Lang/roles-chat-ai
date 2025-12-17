@@ -1,10 +1,10 @@
-package com.blueberry.quiz_user.controller;
+package com.achilles.chat_user.controller;
 
 import com.achilles.model.common.Result;
 import com.achilles.model.user.UserDTO;
 import com.achilles.model.user.UserVO;
-import com.blueberry.quiz_user.auth.TokenManager;
-import com.blueberry.quiz_user.service.impl.UserServiceImpl;
+import com.achilles.chat_user.auth.TokenManager;
+import com.achilles.chat_user.service.impl.UserServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

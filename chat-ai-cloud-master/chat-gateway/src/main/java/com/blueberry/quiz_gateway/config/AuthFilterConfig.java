@@ -59,7 +59,11 @@ public class AuthFilterConfig {
             }
             //更新过期时间
             redisTemplate.expire(token, Duration.ofHours(2));
-            return chain.filter(exchange);
+
+            var request = exchange.getRequest().mutate()
+                    .header("userId", userId)
+                    .build();
+            return chain.filter(exchange.mutate().request(request).build());
         }
     }
 }

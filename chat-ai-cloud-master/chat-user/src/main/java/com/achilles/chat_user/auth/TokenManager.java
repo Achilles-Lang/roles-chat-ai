@@ -1,4 +1,4 @@
-package com.blueberry.quiz_user.auth;
+package com.achilles.chat_user.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.redis.core.StringRedisTemplate;

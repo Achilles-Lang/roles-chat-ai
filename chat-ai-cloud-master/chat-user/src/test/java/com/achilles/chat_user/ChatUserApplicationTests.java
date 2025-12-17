@@ -1,4 +1,4 @@
-package com.blueberry.quiz_user;
+package com.achilles.chat_user;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

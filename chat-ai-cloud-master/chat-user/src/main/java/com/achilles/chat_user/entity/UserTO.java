@@ -1,4 +1,4 @@
-package com.blueberry.quiz_user.entity;
+package com.achilles.chat_user.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
