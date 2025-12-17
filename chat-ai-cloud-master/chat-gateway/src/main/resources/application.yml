@@ -47,7 +47,7 @@ spring:
           predicates:
               - Path=/doc/**
         - id: chat-knowledge
-          uri: lb://chat-knowledge
+          uri: http://localhost:8085
           predicates:
               - Path=/knowledge/**
   codec:

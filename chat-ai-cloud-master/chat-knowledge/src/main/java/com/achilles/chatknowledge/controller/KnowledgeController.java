@@ -17,11 +17,13 @@ public class KnowledgeController {
     // 上传文件接口
     @PostMapping("/upload")
     public Result<String> upload(@RequestParam("file") MultipartFile file,
-                                 @RequestParam(value = "description", required = false) String description) {
+                                 @RequestParam(value = "description", required = false) String description,
+                                 @RequestHeader("userId") Long userId) { // [修改1] 获取网关传来的 userId
         if (file.isEmpty()) {
             return Result.error("文件不能为空");
         }
-        knowledgeService.processUpload(file, description);
+        // [修改2] 将 userId 传给 Service
+        knowledgeService.processUpload(file, description, userId);
         return Result.success("文件已存入知识库");
     }
 

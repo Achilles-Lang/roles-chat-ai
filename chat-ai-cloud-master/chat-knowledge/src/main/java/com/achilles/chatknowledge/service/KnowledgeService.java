@@ -32,30 +32,38 @@ public class KnowledgeService {
     @Resource
     private EmbeddingStore<TextSegment> embeddingStore;
 
+    @Value("${file.upload-path:./uploads/}")
+    private String uploadPath;
+
     // 直接在代码里读取配置的 API Key
     @Value("${langchain4j.dashscope.api-key}")
     private String apiKey;
 
     /**
-     * 1. 核心功能：处理上传的文件（保存 -> 切片 -> 向量化 -> 存入知识库）
+     * 处理上传的文件
      */
-    public void processUpload(MultipartFile file, String description) {
+    public void processUpload(MultipartFile file, String description, Long userId) {
         try {
-            // 先把文件存到本地临时目录
-            Path tempDir = Files.createTempDirectory("rag_upload");
-            File tempFile = tempDir.resolve(file.getOriginalFilename()).toFile();
-            file.transferTo(tempFile);
+            File directory = new File(uploadPath);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+            String finalName = file.getOriginalFilename();
+            File saveFile = new File(directory, finalName);
+
+            file.transferTo(saveFile);
 
             // 记录到数据库
             KnowledgeDocument doc = new KnowledgeDocument();
+            doc.setUserId(userId);
             doc.setFileName(file.getOriginalFilename());
             doc.setDescription(description);
             doc.setCreateTime(LocalDateTime.now());
-            doc.setFileUrl(tempFile.getAbsolutePath());
+            doc.setFileUrl(saveFile.getAbsolutePath());
             knowledgeMapper.insert(doc);
 
             // 使用 LangChain4j 解析文件
-            Document document = FileSystemDocumentLoader.loadDocument(tempFile.toPath());
+            Document document = FileSystemDocumentLoader.loadDocument(saveFile.toPath());
 
             // 初始化 Embedding 模型
             QwenEmbeddingModel embeddingModel = QwenEmbeddingModel.builder()
@@ -72,8 +80,6 @@ public class KnowledgeService {
 
             ingestor.ingest(document);
 
-            // 删除临时文件
-            tempFile.delete();
 
         } catch (IOException e) {
             throw new RuntimeException("文件处理失败: " + e.getMessage());

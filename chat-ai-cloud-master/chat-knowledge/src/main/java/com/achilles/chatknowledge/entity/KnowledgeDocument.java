@@ -14,6 +14,11 @@ public class KnowledgeDocument {
     private String fileName;
     private String description;
     private LocalDateTime createTime;
+    private String fileUrl;
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
 
     public Long getId() {
         return id;
@@ -56,5 +61,6 @@ public class KnowledgeDocument {
     }
 
     public void setFileUrl(String absolutePath) {
+        this.fileUrl = absolutePath;
     }
 }

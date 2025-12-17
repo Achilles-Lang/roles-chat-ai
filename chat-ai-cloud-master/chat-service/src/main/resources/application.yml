@@ -25,6 +25,12 @@ spring:
       discovery:
         group: CHAT_GROUP
         enabled: true
+    openfeign:
+      client:
+        config:
+          default:
+              connect-timeout: 5000
+              read-timeout: 10000
   profiles:
     active: dev
   data:
