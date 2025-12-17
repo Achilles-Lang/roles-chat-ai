@@ -1,6 +1,6 @@
 package com.blueberry.quiz_user.exception;
 
-import com.blueberry.model.common.Result;
+import com.achilles.model.common.Result;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 

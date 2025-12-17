@@ -2,8 +2,8 @@ package com.blueberry.quiz_user.service.impl;
 
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.blueberry.model.user.UserDTO;
-import com.blueberry.model.user.UserVO;
+import com.achilles.model.user.UserDTO;
+import com.achilles.model.user.UserVO;
 import com.blueberry.quiz_user.entity.UserTO;
 import com.blueberry.quiz_user.exception.UserException;
 import com.blueberry.quiz_user.mapper.UserMapper;

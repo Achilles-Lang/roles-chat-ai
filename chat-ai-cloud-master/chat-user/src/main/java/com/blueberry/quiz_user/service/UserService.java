@@ -1,7 +1,7 @@
 package com.blueberry.quiz_user.service;
 
-import com.blueberry.model.user.UserDTO;
-import com.blueberry.model.user.UserVO;
+import com.achilles.model.user.UserDTO;
+import com.achilles.model.user.UserVO;
 
 public interface UserService {
     boolean addUser(UserDTO userDTO);

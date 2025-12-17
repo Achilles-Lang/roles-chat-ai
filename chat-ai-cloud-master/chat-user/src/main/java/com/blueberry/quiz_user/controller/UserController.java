@@ -1,8 +1,8 @@
 package com.blueberry.quiz_user.controller;
 
-import com.blueberry.model.common.Result;
-import com.blueberry.model.user.UserDTO;
-import com.blueberry.model.user.UserVO;
+import com.achilles.model.common.Result;
+import com.achilles.model.user.UserDTO;
+import com.achilles.model.user.UserVO;
 import com.blueberry.quiz_user.auth.TokenManager;
 import com.blueberry.quiz_user.service.impl.UserServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
